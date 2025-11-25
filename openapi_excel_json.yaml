@@ -1,0 +1,108 @@
+openapi: 3.0.1
+info:
+  title: Excel to JSON Service
+  version: "1.0.0"
+  description: |
+    Convert Excel files (via URL or base64) to JSON. Designed to be used as a tool/plugin in Coze.
+
+servers:
+  - url: http://host.docker.internal:8001
+    description: Local Excel to JSON service
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /convert:
+    get:
+      summary: Convert Excel to JSON
+      description: |
+        Convert an Excel file to JSON via query parameters.
+
+        You can either provide a public `file_url` or a `file_base64` string.
+
+        - If `sheet_name` is provided, only that sheet will be converted.
+        - If `sheet_name` is omitted, all sheets will be converted.
+        - If `header_row` is true, the first row is treated as header.
+      parameters:
+        - in: query
+          name: file_url
+          description: Public URL of the Excel file.
+          schema:
+            type: string
+        - in: query
+          name: file_base64
+          description: Base64 encoded Excel content.
+          schema:
+            type: string
+        - in: query
+          name: sheet_name
+          description: Optional specific sheet name. If omitted, all sheets are converted.
+          schema:
+            type: string
+        - in: query
+          name: header_row
+          description: Whether to treat the first row as header.
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Conversion result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sheets:
+                    type: string
+
+  /convert_qa:
+    get:
+      summary: Convert Excel to QA items
+      description: |
+        Flatten Excel sheets into a list of question-answer items by student.
+
+        Each item includes sheet name, student name, field key, question text, answer text, and score.
+      parameters:
+        - in: query
+          name: file_url
+          description: Public URL of the Excel file.
+          schema:
+            type: string
+        - in: query
+          name: file_base64
+          description: Base64 encoded Excel content.
+          schema:
+            type: string
+        - in: query
+          name: sheet_name
+          description: Optional specific sheet name. If omitted, all sheets are converted.
+          schema:
+            type: string
+        - in: query
+          name: header_row
+          description: Whether to treat the first row as header.
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Flattened QA items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: string
